@@ -2,8 +2,8 @@ import click
 from items import add_item, view_inventory, update_item, remove_item
 from purchases import record_purchase
 from sales import record_sale
-#from backup_restore import #backup_data, restore_data
-#from search import #search_items
+from backup_restore import backup_data, restore_data
+from search import search_items
 from database import setup_database
 
 @click.group()
@@ -54,6 +54,26 @@ def purchase(item_id, quantity, purchase_price):
 def sale(item_id, quantity, selling_price):
     """Record a sales transaction."""
     record_sale(item_id, quantity, selling_price)
+
+@cli.command()
+@click.option('--keyword', prompt='Search keyword', help='Keyword to search for')
+def search(keyword):
+    """Search for specific items in the inventory."""
+    items = search_items(keyword)
+    for item in items:
+        click.echo(f'ID: {item[0]}, Name: {item[1]}, Category: {item[2]}, Quantity: {item[3]}, Price: {item[4]}')
+
+@cli.command()
+@click.option('--backup_path', prompt='Backup file path', help='File path to save the backup')
+def backup(backup_path):
+    """Backup the inventory database."""
+    backup_data(backup_path)
+
+@cli.command()
+@click.option('--backup_path', prompt='Backup file path', help='File path to restore the backup from')
+def restore(backup_path):
+    """Restore the inventory database from a backup."""
+    restore_data(backup_path)
 
 if __name__ == '__main__':
     setup_database()  # Ensure the database and tables are created
