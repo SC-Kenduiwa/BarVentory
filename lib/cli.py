@@ -1,28 +1,60 @@
-# lib/cli.py
+import click
+from items import add_item, view_inventory, update_item, remove_item
+from purchases import record_purchase
+from sales import record_sale
+#from backup_restore import #backup_data, restore_data
+#from search import #search_items
+from database import setup_database
 
-from helpers import (
-    exit_program,
-    helper_1
-)
+@click.group()
+def cli():
+    """🍺 Barventory - Command Line Inventory Management for Bars"""
+    pass
 
+@cli.command()
+@click.option('--name', prompt='Item name', help='Name of the item')
+@click.option('--category', prompt='Item category', help='Category of the item')
+@click.option('--quantity', prompt='Quantity', type=int, help='Quantity of the item')
+@click.option('--price', prompt='Price', type=float, help='Price of the item')
+def add(name, category, quantity, price):
+    """Add a new item to the inventory."""
+    add_item(name, category, quantity, price)
 
-def main():
-    while True:
-        menu()
-        choice = input("> ")
-        if choice == "0":
-            exit_program()
-        elif choice == "1":
-            helper_1()
-        else:
-            print("Invalid choice")
+@cli.command()
+def view():
+    """View the current stock levels of all items."""
+    view_inventory()
 
+@cli.command()
+@click.option('--item_id', prompt='Item ID', type=int, help='ID of the item to update')
+@click.option('--quantity', prompt='New quantity', type=int, help='New quantity of the item', required=False)
+@click.option('--price', prompt='New price', type=float, help='New price of the item', required=False)
+def update(item_id, quantity, price):
+    """Update the quantity or price of an existing item."""
+    update_item(item_id, quantity, price)
 
-def menu():
-    print("Please select an option:")
-    print("0. Exit the program")
-    print("1. Some useful function")
+@cli.command()
+@click.option('--item_id', prompt='Item ID', type=int, help='ID of the item to remove')
+def remove(item_id):
+    """Remove an item from the inventory."""
+    remove_item(item_id)
 
+@cli.command()
+@click.option('--item_id', prompt='Item ID', type=int, help='ID of the item purchased')
+@click.option('--quantity', prompt='Quantity purchased', type=int, help='Quantity purchased')
+@click.option('--purchase_price', prompt='Purchase price', type=float, help='Purchase price')
+def purchase(item_id, quantity, purchase_price):
+    """Record a purchase of new stock."""
+    record_purchase(item_id, quantity, purchase_price)
 
-if __name__ == "__main__":
-    main()
+@cli.command()
+@click.option('--item_id', prompt='Item ID', type=int, help='ID of the item sold')
+@click.option('--quantity', prompt='Quantity sold', type=int, help='Quantity sold')
+@click.option('--selling_price', prompt='Selling price', type=float, help='Selling price')
+def sale(item_id, quantity, selling_price):
+    """Record a sales transaction."""
+    record_sale(item_id, quantity, selling_price)
+
+if __name__ == '__main__':
+    setup_database()  # Ensure the database and tables are created
+    cli()
